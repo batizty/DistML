@@ -233,6 +233,8 @@ object DistML {
       |        provider = "akka.remote.RemoteActorRefProvider"
       |
       |        guardian-supervisor-strategy = "akka.actor.DefaultSupervisorStrategy"
+      |
+      |        creation-timeout = 30s
       |      }
       |      io {
       |         tcp {
