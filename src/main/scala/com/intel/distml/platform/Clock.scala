@@ -3,7 +3,7 @@ package com.intel.distml.platform
 /**
  * Created by yunlong on 2/3/16.
  */
-class Clock(name : String) {
+class Clock(name: String) {
 
   var startTime = 0L
   var total = 0L

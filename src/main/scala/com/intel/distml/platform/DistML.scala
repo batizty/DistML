@@ -12,7 +12,7 @@ import com.intel.distml.util.scala.DoubleArrayWithIntKey
 import com.typesafe.config.ConfigFactory
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileSystem}
-import org.apache.spark.{JavaSparkListener, SparkContext}
+import org.apache.spark.{SparkContext}
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.scheduler._
@@ -29,24 +29,23 @@ object DistMLState extends Enumeration {
   type DistMLState = Value
   val READY, RECYCLED = Value
 
-  def isReady(state : DistMLState) : Boolean = {
+  def isReady(state: DistMLState): Boolean = {
     state == READY
   }
 }
 
-class DistML[T: ClassTag] (
-val model : Model,
-val psCount : Int,
-system: ActorSystem,
-val monitorPath : String,
-monitorActor : ActorRef,
-psDriverThread : ParamServerDriver[T]
-) extends JavaSparkListener
-{
+class DistML[T: ClassTag](
+  val model: Model,
+  val psCount: Int,
+  system: ActorSystem,
+  val monitorPath: String,
+  monitorActor: ActorRef,
+  psDriverThread: ParamServerDriver[T]
+) extends SparkListener {
 
   var state = DistMLState.READY
 
-  def params() : RDD[T] = {
+  def params(): RDD[T] = {
     assertRecycled()
 
     psDriverThread.finalResult
@@ -64,7 +63,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def setTrainSetSize(size : Long): Unit = {
+  def setTrainSetSize(size: Long): Unit = {
     assertReady()
 
     val req = new StartTraining(size)
@@ -75,7 +74,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def startSSP(maxIterations : Int, maxLag : Int): Unit = {
+  def startSSP(maxIterations: Int, maxLag: Int): Unit = {
     assertReady()
 
     val req = StartTraining.ssp(maxIterations, maxLag);
@@ -97,7 +96,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def save(path : String): Unit = {
+  def save(path: String): Unit = {
     assertReady()
 
     val req = new SaveModel(path)
@@ -108,7 +107,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def load(path : String): Unit = {
+  def load(path: String): Unit = {
     assertReady()
 
     val req = new LoadModel(path)
@@ -119,7 +118,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def zero(matrixName : String): Unit = {
+  def zero(matrixName: String): Unit = {
     assertReady()
 
     val req = new ZeroModel(matrixName)
@@ -130,7 +129,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def random(matrixName : String): Unit = {
+  def random(matrixName: String): Unit = {
     assertReady()
 
     val req = new RandModel(matrixName)
@@ -141,7 +140,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def init(matrixName : String, value : String): Unit = {
+  def init(matrixName: String, value: String): Unit = {
     assertReady()
 
     val req = new SetModel(matrixName, value)
@@ -152,7 +151,7 @@ psDriverThread : ParamServerDriver[T]
     }
   }
 
-  def setAlpha(matrixName : String, initialAlpha : Float, minAlpha : Float, factor : Float): Unit = {
+  def setAlpha(matrixName: String, initialAlpha: Float, minAlpha: Float, factor: Float): Unit = {
     assertReady()
 
     val req = new SetAlpha(matrixName, initialAlpha, minAlpha, factor)
@@ -169,7 +168,6 @@ psDriverThread : ParamServerDriver[T]
     monitorActor.tell(req, null)
   }
 
-
   def recycle(): Unit = {
     assertReady()
 
@@ -181,23 +179,23 @@ psDriverThread : ParamServerDriver[T]
     state = DistMLState.RECYCLED
   }
 
-//  override def onStageCompleted(stageCompleted: SparkListenerStageCompleted) { }
-//  override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted) { }
-//  override def onTaskStart(taskStart: SparkListenerTaskStart) { }
-//  override def onTaskGettingResult(taskGettingResult: SparkListenerTaskGettingResult) { }
-//  override def onTaskEnd(taskEnd: SparkListenerTaskEnd) { }
-//  override def onJobStart(jobStart: SparkListenerJobStart) { }
-//  override def onJobEnd(jobEnd: SparkListenerJobEnd) { }
-//  override def onEnvironmentUpdate(environmentUpdate: SparkListenerEnvironmentUpdate) { }
-//  override def onBlockManagerAdded(blockManagerAdded: SparkListenerBlockManagerAdded) { }
-//  override def onBlockManagerRemoved(blockManagerRemoved: SparkListenerBlockManagerRemoved) { }
-//  override def onUnpersistRDD(unpersistRDD: SparkListenerUnpersistRDD) { }
-//  override def onApplicationStart(applicationStart: SparkListenerApplicationStart) { }
-//  override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) { }
-//  override def onExecutorMetricsUpdate(executorMetricsUpdate: SparkListenerExecutorMetricsUpdate) { }
-//  override def onExecutorAdded(executorAdded: SparkListenerExecutorAdded) { }
-//  override def onExecutorRemoved(executorRemoved: SparkListenerExecutorRemoved) { }
-//  override def onBlockUpdated(blockUpdated: SparkListenerBlockUpdated) { }
+  //  override def onStageCompleted(stageCompleted: SparkListenerStageCompleted) { }
+  //  override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted) { }
+  //  override def onTaskStart(taskStart: SparkListenerTaskStart) { }
+  //  override def onTaskGettingResult(taskGettingResult: SparkListenerTaskGettingResult) { }
+  //  override def onTaskEnd(taskEnd: SparkListenerTaskEnd) { }
+  //  override def onJobStart(jobStart: SparkListenerJobStart) { }
+  //  override def onJobEnd(jobEnd: SparkListenerJobEnd) { }
+  //  override def onEnvironmentUpdate(environmentUpdate: SparkListenerEnvironmentUpdate) { }
+  //  override def onBlockManagerAdded(blockManagerAdded: SparkListenerBlockManagerAdded) { }
+  //  override def onBlockManagerRemoved(blockManagerRemoved: SparkListenerBlockManagerRemoved) { }
+  //  override def onUnpersistRDD(unpersistRDD: SparkListenerUnpersistRDD) { }
+  //  override def onApplicationStart(applicationStart: SparkListenerApplicationStart) { }
+  //  override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) { }
+  //  override def onExecutorMetricsUpdate(executorMetricsUpdate: SparkListenerExecutorMetricsUpdate) { }
+  //  override def onExecutorAdded(executorAdded: SparkListenerExecutorAdded) { }
+  //  override def onExecutorRemoved(executorRemoved: SparkListenerExecutorRemoved) { }
+  //  override def onBlockUpdated(blockUpdated: SparkListenerBlockUpdated) { }
 
 }
 
@@ -214,19 +212,18 @@ object DistML {
       |akka.remote.netty.tcp.maximum-frame-size=4126935
     """.stripMargin
 
-  def dummyF(model : Model, index : Int, stores : java.util.HashMap[String, DataStore]) : Int = {
+  def dummyF(model: Model, index: Int, stores: java.util.HashMap[String, DataStore]): Int = {
     1
   }
 
-  def defaultF(model : Model, index : Int, stores : java.util.HashMap[String, DataStore])
-              : Iterator[(Int, String, DataStore)] = {
+  def defaultF(model: Model, index: Int, stores: java.util.HashMap[String, DataStore]): Iterator[(Int, String, DataStore)] = {
 
     println("collecting model parameters...")
 
     val map = new Array[(Int, String, DataStore)](stores.size())
     var i = 0
     for (name <- stores.keySet()) {
-      val t : String = name
+      val t: String = name
       map(i) = (index, t, stores.get(name))
       i += 1
     }
@@ -235,26 +232,26 @@ object DistML {
     map.iterator
   }
 
-  def distribute(sc : SparkContext, model : Model, psCount : Int): DistML[Int] = {
+  def distribute(sc: SparkContext, model: Model, psCount: Int): DistML[Int] = {
     distribute[Int](sc, model, psCount, false, dummyF _)
   }
 
-//  def distribute(sc : SparkContext, model : Model, psCount : Int, psBackup : Boolean): DistML[Int] = {
-//    distribute[Int](sc, model, psCount, psBackup, dummyF)
-//  }
+  //  def distribute(sc : SparkContext, model : Model, psCount : Int, psBackup : Boolean): DistML[Int] = {
+  //    distribute[Int](sc, model, psCount, psBackup, dummyF)
+  //  }
 
-//  def distribute[T: ClassTag](sc : SparkContext, model : Model, psCount : Int,
-//                              f : Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
-//    distribute[T](sc, model, psCount, false, f)
-//  }
-  def distribute[T: ClassTag](sc : SparkContext, model : Model, psCount : Int,
-                            f : Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
+  //  def distribute[T: ClassTag](sc : SparkContext, model : Model, psCount : Int,
+  //                              f : Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
+  //    distribute[T](sc, model, psCount, false, f)
+  //  }
+  def distribute[T: ClassTag](sc: SparkContext, model: Model, psCount: Int,
+    f: Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
 
     distribute[T](sc, model, psCount, false, f)
   }
 
-  def distribute[T: ClassTag](sc : SparkContext, model : Model, psCount : Int, psBackup : Boolean,
-                              f : Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
+  def distribute[T: ClassTag](sc: SparkContext, model: Model, psCount: Int, psBackup: Boolean,
+    f: Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
 
     model.autoPartition(psCount)
 
@@ -284,7 +281,7 @@ object DistML {
     dm
   }
 
-  def saveMeta(hdfsPath : String, meta : Properties, comments: String) {
+  def saveMeta(hdfsPath: String, meta: Properties, comments: String) {
     val conf: Configuration = new Configuration
     val fs: FileSystem = FileSystem.get(URI.create(hdfsPath), conf)
 

@@ -16,17 +16,18 @@ import scala.collection.mutable.ListBuffer
  */
 object Word2VecExample {
   private case class Params(
-                             psCount: Int = 1,
-                             numPartitions : Int = 1,
-                             input: String = null,
-                             cbow: Boolean = true,
-                             alpha: Double = 0.0f,
-                             alphaFactor: Double = 10.0f,
-                             window : Int = 7,
-                             batchSize : Int = 100,
-                             vectorSize : Int = 10,
-                             minFreq : Int = 50,
-                             maxIterations: Int = 100 ) {
+    psCount: Int = 1,
+    numPartitions: Int = 1,
+    input: String = null,
+    cbow: Boolean = true,
+    alpha: Double = 0.0f,
+    alphaFactor: Double = 10.0f,
+    window: Int = 7,
+    batchSize: Int = 100,
+    vectorSize: Int = 10,
+    minFreq: Int = 50,
+    maxIterations: Int = 100
+  ) {
 
     def show(): Unit = {
       println("=========== params =============")
@@ -80,7 +81,7 @@ object Word2VecExample {
         .action((x, c) => c.copy(cbow = x))
       arg[String]("<input>...")
         .text("input paths (directories) to plain text corpora." +
-        "  Each text file line should hold 1 document.")
+          "  Each text file line should hold 1 document.")
         .unbounded()
         .required()
         .action((x, c) => c.copy(input = x))
@@ -93,12 +94,12 @@ object Word2VecExample {
     }
   }
 
-  def normalizeString(src : String) : String = {
+  def normalizeString(src: String): String = {
     //src.filter( c => ((c >= '0') && (c <= '9')) )
-    src.filter( c => (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')) || (c == ' '))).toLowerCase
+    src.filter(c => (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')) || (c == ' '))).toLowerCase
   }
 
-  def toWords(line : String) : Array[String] = {
+  def toWords(line: String): Array[String] = {
     val words = line.split(" ").map(normalizeString)
     val list = new mutable.MutableList[String]()
     for (w <- words) {
@@ -109,7 +110,7 @@ object Word2VecExample {
     list.toArray
   }
 
-  def fromWordsToIds(bdic : Broadcast[Dict])(words : Array[String]) : Array[Int] = {
+  def fromWordsToIds(bdic: Broadcast[Dict])(words: Array[String]): Array[Int] = {
 
     val dic = bdic.value
 
@@ -125,7 +126,7 @@ object Word2VecExample {
     wordIDs.toArray
   }
 
-  def run(p : Params): Unit = {
+  def run(p: Params): Unit = {
 
     p.show
 
@@ -155,12 +156,10 @@ object Word2VecExample {
     if (p.alpha < 10e-6) {
       if (p.cbow) {
         initialAlpha = 0.05f
-      }
-      else {
+      } else {
         initialAlpha = 0.0025f
       }
-    }
-    else {
+    } else {
       initialAlpha = p.alpha.toFloat
     }
 
@@ -191,7 +190,6 @@ object Word2VecExample {
     for (s <- sims) {
       println(wordMap.getWord(s._1) + ", " + s._2)
     }
-
 
     sc.stop()
 

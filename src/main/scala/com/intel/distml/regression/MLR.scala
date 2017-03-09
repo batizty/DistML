@@ -17,11 +17,11 @@ import scala.collection.mutable
  */
 
 class MLRModel(
-val inputDim : Long,
-val outputDim : Int
+  val inputDim: Long,
+  val outputDim: Int
 ) extends Model {
 
-  registerMatrix("weights", new DoubleMatrix(inputDim,  outputDim))
+  registerMatrix("weights", new DoubleMatrix(inputDim, outputDim))
 
 }
 
@@ -39,8 +39,8 @@ object MLR {
     for (i <- 0 until x.length) x(i) /= sum
   }
 
-  def train(data: RDD[(mutable.HashMap[Long, Double], Array[Double])], dm : DistML[Iterator[(Int, String, DataStore)]],
-            maxIterations : Int, batchSize : Int): Unit = {
+  def train(data: RDD[(mutable.HashMap[Long, Double], Array[Double])], dm: DistML[Iterator[(Int, String, DataStore)]],
+    maxIterations: Int, batchSize: Int): Unit = {
 
     val m = dm.model.asInstanceOf[MLRModel]
     val monitorPath = dm.monitorPath
@@ -59,10 +59,10 @@ object MLR {
 
         var cost = 0.0
 
-        while(it.hasNext) {
+        while (it.hasNext) {
           samples.clear()
           var count = 0
-          while((count < batchSize) && it.hasNext) {
+          while ((count < batchSize) && it.hasNext) {
             samples.add(it.next())
             count += 1
           }
@@ -76,7 +76,7 @@ object MLR {
 
           val w_old = new util.HashMap[Long, Array[Double]]
           for ((key, value) <- w) {
-            var tmp:Array[Double] = new Array[Double](value.length)
+            var tmp: Array[Double] = new Array[Double](value.length)
             for (i <- 0 until value.length) {
               tmp(i) = value(i)
             }
@@ -87,8 +87,8 @@ object MLR {
             val p_y_given_x: Array[Double] = new Array[Double](m.outputDim)
             val dy: Array[Double] = new Array[Double](m.outputDim)
 
-            val i:Long = 0
-            for (i<-0 until m.outputDim) {
+            val i: Long = 0
+            for (i <- 0 until m.outputDim) {
               p_y_given_x(i) = 0.0
               for (key <- x.keySet) {
                 p_y_given_x(i) += (w.get(key))(i) * x.get(key).get
@@ -100,7 +100,7 @@ object MLR {
             for (i <- 0 until m.outputDim) {
               dy(i) = label(i) - p_y_given_x(i)
               for (key <- x.keySet) {
-                (w.get(key)) (i.toInt) += lr * dy(i) * x.get(key).get
+                (w.get(key))(i.toInt) += lr * dy(i) * x.get(key).get
               }
               if (label(i) > 0.0) {
                 cost = cost + label(i) * Math.log(p_y_given_x(i))
@@ -112,7 +112,7 @@ object MLR {
 
           // tuning in future
           for (key <- w.keySet()) {
-            val grad: Array[java.lang.Double]  = new Array[java.lang.Double](m.outputDim)
+            val grad: Array[java.lang.Double] = new Array[java.lang.Double](m.outputDim)
             for (i <- 0 until m.outputDim) {
               grad(i) = w.get(key)(i) - w_old.get(key)(i)
             }
@@ -134,14 +134,13 @@ object MLR {
 
       dm.iterationDone()
 
-
-      val totalCost = t.reduce(_+_)
+      val totalCost = t.reduce(_ + _)
       println("Total Cost: " + totalCost)
     }
   }
 
-  def train(sc : SparkContext, samples: RDD[(mutable.HashMap[Long, Double], Array[Double])], psCount : Int, inputDim : Long, outputDim : Int,
-            maxIterations : Int, batchSize : Int): DistML[Iterator[(Int, String, DataStore)]] = {
+  def train(sc: SparkContext, samples: RDD[(mutable.HashMap[Long, Double], Array[Double])], psCount: Int, inputDim: Long, outputDim: Int,
+    maxIterations: Int, batchSize: Int): DistML[Iterator[(Int, String, DataStore)]] = {
 
     val m = new MLRModel(inputDim, outputDim)
 
@@ -153,21 +152,21 @@ object MLR {
     dm
   }
 
-  def validate(data : RDD[(mutable.HashMap[Long, Double], Array[Double])], dm : DistML[Iterator[(Int, String, DataStore)]]): Int = {
+  def validate(data: RDD[(mutable.HashMap[Long, Double], Array[Double])], dm: DistML[Iterator[(Int, String, DataStore)]]): Int = {
     val m = dm.model.asInstanceOf[MLRModel]
     val monitorPath = dm.monitorPath
 
-    val t1 = data.mapPartitionsWithIndex( (index, it) => {
+    val t1 = data.mapPartitionsWithIndex((index, it) => {
       val session = new Session(m, monitorPath, index)
       val weights = m.getMatrix("weights").asInstanceOf[DoubleMatrix]
       val w = weights.fetch(KeyCollection.ALL, session)
 
       var correct = 0
       var error = 0
-      for((x, label) <- it) {
+      for ((x, label) <- it) {
         val p_y_given_x: Array[Double] = new Array[Double](m.outputDim)
-        val i:Long = 0
-        for (i<-0 until m.outputDim) {
+        val i: Long = 0
+        for (i <- 0 until m.outputDim) {
           p_y_given_x(i) = 0.0
           for (key <- x.keySet) {
             p_y_given_x(i) += (w.get(key))(i) * x.get(key).get
@@ -179,11 +178,11 @@ object MLR {
         val max = p_y_given_x.max
         var c_tmp = 0
         for (i <- 0 until m.outputDim) {
-          if(label(i) > 0.0 && p_y_given_x(i) == max) {
+          if (label(i) > 0.0 && p_y_given_x(i) == max) {
             c_tmp = 1;
           }
         }
-        if(c_tmp == 1) {
+        if (c_tmp == 1) {
           correct += 1
         } else {
           error += 1
@@ -198,6 +197,6 @@ object MLR {
       r.iterator
     })
 
-    t1.reduce(_+_)
+    t1.reduce(_ + _)
   }
 }

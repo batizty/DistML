@@ -9,8 +9,8 @@ import scala.collection.immutable
  */
 class Dict extends Serializable {
 
-  var  word2id = new immutable.HashMap[String, Int]
-  var  id2word = new immutable.HashMap[Int, String]
+  var word2id = new immutable.HashMap[String, Int]
+  var id2word = new immutable.HashMap[Int, String]
 
   def getSize: Int = {
     return word2id.size
@@ -35,7 +35,7 @@ class Dict extends Serializable {
     return id2word.contains(id)
   }
 
-  def put(word : String, id : Int): Unit = {
+  def put(word: String, id: Int): Unit = {
     word2id += (word -> id)
     id2word += (id -> word)
   }
@@ -50,7 +50,6 @@ class Dict extends Serializable {
       word2id += (word -> id)
       id2word += (id -> word)
       return id
-    }
-    else return getID(word)
+    } else return getID(word)
   }
 }

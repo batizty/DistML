@@ -13,19 +13,19 @@ import scala.collection.mutable
 import scala.collection.JavaConversions._
 
 /**
-  * Created by jimmy on 15-12-14.
-  */
+ * Created by jimmy on 15-12-14.
+ */
 object Mnist {
   val BATCH_SIZE = 100
   private case class Params(
-                          input: String = null,
-                          inputDim: Long = 0,
-                          outputDim: Int = 0,
-                          partitions: Int = 1,
-                          psCount: Int = 1,
-                          batchSize: Int = 100,
-                          maxIterations: Int = 500
-                          )
+    input: String = null,
+    inputDim: Long = 0,
+    outputDim: Int = 0,
+    partitions: Int = 1,
+    psCount: Int = 1,
+    batchSize: Int = 100,
+    maxIterations: Int = 500
+  )
 
   def main(args: Array[String]): Unit = {
     val mlrParams = Params()
@@ -72,20 +72,18 @@ object Mnist {
     val len = items.length
     //val data = new Array[Double](len-1)
     val data = new util.HashMap[Long, Double]()
-    for (i <- 0 to len-2) {
+    for (i <- 0 to len - 2) {
       val tmp = items(i).toDouble
       if (tmp != 0.0) {
         data(i) = tmp
       }
     }
-    labels(items(len-1).toInt) = 1.0
+    labels(items(len - 1).toInt) = 1.0
     (data, labels)
   }
 
-
-
   def dumpweights(weights: util.HashMap[java.lang.Long, Array[java.lang.Double]], keyList: KeyList): Unit = {
-    for (i<-0 until 2) {
+    for (i <- 0 until 2) {
       println("for line " + i)
       for (key <- keyList.iterator()) {
         print(" " + weights.get(key)(i))
@@ -94,7 +92,7 @@ object Mnist {
   }
 
   def dumpweights(weights: util.HashMap[java.lang.Long, Array[java.lang.Double]], keySet: util.Set[Long]): Unit = {
-    for (i<-0 until 2) {
+    for (i <- 0 until 2) {
       println("for line " + i)
       for (key <- keySet.iterator()) {
         print(" " + weights.get(key)(i))
@@ -116,17 +114,17 @@ object Mnist {
       val len = items.length
       //val data = new Array[Double](len-1)
       val data = new mutable.HashMap[Long, Double]()
-      for (i <- 0 to len-2) {
+      for (i <- 0 to len - 2) {
         val tmp = items(i).toDouble
         if (tmp != 0.0) {
           data(i) = tmp
         }
       }
-      labels(items(len-1).toInt) = 1.0
+      labels(items(len - 1).toInt) = 1.0
       (data, labels)
     }).repartition(p.partitions)
 
-    val dm = MLR.train(sc, samples, p.psCount, p.inputDim, p.outputDim, p.maxIterations,  p.batchSize)
+    val dm = MLR.train(sc, samples, p.psCount, p.inputDim, p.outputDim, p.maxIterations, p.batchSize)
 
     val correct = MLR.validate(samples, dm)
     println("Total Correct " + correct)

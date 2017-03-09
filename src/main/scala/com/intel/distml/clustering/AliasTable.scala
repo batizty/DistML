@@ -6,7 +6,7 @@ import java.util.Random
 /**
  * Created by yunlong on 12/19/15.
  */
-class AliasTable (K: Int) extends Serializable {
+class AliasTable(K: Int) extends Serializable {
 
   var L: Array[Int] = new Array[Int](K)
   var H: Array[Int] = new Array[Int](K)
@@ -16,10 +16,10 @@ class AliasTable (K: Int) extends Serializable {
     val s = gen.nextFloat() * K
     var t = s.toInt
     if (t >= K) t = K - 1
-    if (K * P(t) < (s-t)) L(t) else H(t)
+    if (K * P(t) < (s - t)) L(t) else H(t)
   }
 
-  def init(probs : Array[(Int, Float)], mass : Float): Unit = {
+  def init(probs: Array[(Int, Float)], mass: Float): Unit = {
 
     val m = 1.0 / K
     val lq = new util.LinkedList[(Int, Float)]()

@@ -21,19 +21,19 @@ import com.intel.distml.regression.{LogisticRegression => LR}
 object MelBlanc {
 
   private case class Params(
-                             runType: String = "train",
-                             psCount: Int = 1,
-                             psBackup : Boolean = false,
-                             trainType : String = "ssp",
-                             maxIterations: Int = 100,
-                             batchSize: Int = 100,  // for asgd only
-                             maxLag : Int = 2,    // for ssp only
-                             dim: Int = 10000000,
-                             eta: Double = 0.0001,
-                             partitions : Int = 1,
-                             input: String = null,
-                             modelPath : String = null
-                             )
+    runType: String = "train",
+    psCount: Int = 1,
+    psBackup: Boolean = false,
+    trainType: String = "ssp",
+    maxIterations: Int = 100,
+    batchSize: Int = 100, // for asgd only
+    maxLag: Int = 2, // for ssp only
+    dim: Int = 10000000,
+    eta: Double = 0.0001,
+    partitions: Int = 1,
+    input: String = null,
+    modelPath: String = null
+  )
 
   def parseBlanc(line: String): (HashMap[Int, Double], Int) = {
     val s = line.split(" ")
@@ -114,44 +114,41 @@ object MelBlanc {
 
     val samples = sc.textFile(p.input).map(parseBlanc)
 
-//    val ratio = new Array[Double](2)
-//    ratio(0) = 0.9
-//    ratio(1) = 0.1
-//    val t = samples.randomSplit(ratio)
-//    val trainSet = t(0).repartition(p.partitions)
-//    val testSet = t(1)
+    //    val ratio = new Array[Double](2)
+    //    ratio(0) = 0.9
+    //    ratio(1) = 0.1
+    //    val t = samples.randomSplit(ratio)
+    //    val trainSet = t(0).repartition(p.partitions)
+    //    val testSet = t(1)
 
     if (p.runType.equals("train")) {
       train(sc, samples, p)
-    }
-    else {
+    } else {
       var auc = verify(sc, samples, p.modelPath)
       println("auc: " + auc)
     }
 
-//    trainAgain(sc, trainSet, p.maxIterations, p.batchSize, p.modelPath)
-//    auc = verify(sc, testSet, p.modelPath)
-//    println("auc: " + auc)
+    //    trainAgain(sc, trainSet, p.maxIterations, p.batchSize, p.modelPath)
+    //    auc = verify(sc, testSet, p.modelPath)
+    //    println("auc: " + auc)
 
     sc.stop()
   }
 
-  def train(sc : SparkContext, samples : RDD[(HashMap[Int, Double], Int)], p : Params): Unit = {
-    var dm : DistML[Iterator[(Int, String, DataStore)]] = null
+  def train(sc: SparkContext, samples: RDD[(HashMap[Int, Double], Int)], p: Params): Unit = {
+    var dm: DistML[Iterator[(Int, String, DataStore)]] = null
     if (p.trainType.equals("bsp")) {
       dm = LR.trainSSP(sc, samples, p.psCount, p.dim, p.eta, p.maxIterations, 0)
-    }
-    else if (p.trainType.equals("ssp")) {
+    } else if (p.trainType.equals("ssp")) {
       dm = LR.trainSSP(sc, samples, p.psCount, p.dim, p.eta, p.maxIterations, p.maxLag)
-    }
-    else if (p.trainType.equals("asgd")) {
+    } else if (p.trainType.equals("asgd")) {
       dm = LR.trainASGD(sc, samples, p.psCount, p.psBackup, p.dim, p.eta, p.maxIterations, p.batchSize)
     }
     LR.save(dm, p.modelPath, "")
     dm.recycle()
   }
 
-  def verify(sc : SparkContext, samples : RDD[(HashMap[Int, Double], Int)], modelPath : String): Double = {
+  def verify(sc: SparkContext, samples: RDD[(HashMap[Int, Double], Int)], modelPath: String): Double = {
 
     val dm = LR.load(sc, modelPath)
 
@@ -162,7 +159,7 @@ object MelBlanc {
     auc
   }
 
-  def trainAgain(sc : SparkContext, samples : RDD[(HashMap[Int, Double], Int)], eta : Double, maxIterations : Int, batchSize : Int, modelPath : String): Unit = {
+  def trainAgain(sc: SparkContext, samples: RDD[(HashMap[Int, Double], Int)], eta: Double, maxIterations: Int, batchSize: Int, modelPath: String): Unit = {
     val dm = LR.load(sc, modelPath)
     LR.trainASGD(samples, dm, eta, maxIterations, batchSize)
     LR.save(dm, modelPath, "")

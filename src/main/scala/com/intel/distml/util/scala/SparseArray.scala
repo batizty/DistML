@@ -8,10 +8,11 @@ import scala.collection.mutable
 /**
  * Created by yunlong on 1/3/16.
  */
-abstract class SparseArray[K, V] (
-dim : Long,
-keyType : Int,
-valueType : Int) extends DMatrix(dim) {
+abstract class SparseArray[K, V](
+  dim: Long,
+  keyType: Int,
+  valueType: Int
+) extends DMatrix(dim) {
 
   format = new DataDesc(DataDesc.DATA_TYPE_ARRAY, keyType, valueType)
 
@@ -20,7 +21,7 @@ valueType : Int) extends DMatrix(dim) {
     val data: Array[Array[Byte]] = session.dataBus.fetch(name, rows, format)
     for (obj <- data) {
       val m: mutable.HashMap[K, V] = readMap(obj)
-      m.foreach( f => result += f )
+      m.foreach(f => result += f)
     }
     return result
   }
@@ -64,6 +65,6 @@ valueType : Int) extends DMatrix(dim) {
     return buf
   }
 
-  protected def toLong(k : K) : Long
+  protected def toLong(k: K): Long
 
 }

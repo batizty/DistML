@@ -63,8 +63,8 @@ object LogisticRegression {
     DistML.saveMeta(hdfsPath, props, comments)
   }
 
-  def trainASGD(samples: RDD[(mutable.HashMap[Int, Double], Int)], dm : DistML[Iterator[(Int, String, DataStore)]],
-            eta : Double, maxIterations : Int, batchSize : Int): Unit = {
+  def trainASGD(samples: RDD[(mutable.HashMap[Int, Double], Int)], dm: DistML[Iterator[(Int, String, DataStore)]],
+    eta: Double, maxIterations: Int, batchSize: Int): Unit = {
 
     println("train ASGD with batch size: " + batchSize)
     val m = dm.model
@@ -87,7 +87,6 @@ object LogisticRegression {
         val fetchClock = new Clock("Fetch")
         val trainClock = new Clock("Train")
         val pushClock = new Clock("Push")
-
 
         while (it.hasNext) {
           batch.clear()
@@ -154,14 +153,14 @@ object LogisticRegression {
         r.iterator
       })
 
-      val totalCost = t.reduce(_+_)
+      val totalCost = t.reduce(_ + _)
       println("============ Iteration done, Total Cost: " + totalCost + " ============")
     }
 
   }
 
-  def trainSSP(samples: RDD[(mutable.HashMap[Int, Double], Int)], dm : DistML[Iterator[(Int, String, DataStore)]],
-            eta : Double, maxIterations : Int, maxLag: Int): Unit = {
+  def trainSSP(samples: RDD[(mutable.HashMap[Int, Double], Int)], dm: DistML[Iterator[(Int, String, DataStore)]],
+    eta: Double, maxIterations: Int, maxLag: Int): Unit = {
 
     println("train SSP with max lag: " + maxLag)
     val m = dm.model
@@ -177,7 +176,6 @@ object LogisticRegression {
       val wd = m.getMatrix("weights").asInstanceOf[DoubleArrayWithIntKey]
 
       val data = it.toArray
-
 
       val keys = new KeyList()
       for (item <- data) {
@@ -233,12 +231,12 @@ object LogisticRegression {
       r.iterator
     })
 
-    val totalCost = t.reduce(_+_)
+    val totalCost = t.reduce(_ + _)
     println("============ Training done, Total Cost: " + totalCost + " ============")
   }
 
-  def trainASGD(sc : SparkContext, samples: RDD[(mutable.HashMap[Int, Double], Int)], psCount : Int, dim : Long,
-            eta : Double, maxIterations : Int, batchSize : Int): DistML[Iterator[(Int, String, DataStore)]] = {
+  def trainASGD(sc: SparkContext, samples: RDD[(mutable.HashMap[Int, Double], Int)], psCount: Int, dim: Long,
+    eta: Double, maxIterations: Int, batchSize: Int): DistML[Iterator[(Int, String, DataStore)]] = {
 
     val m = new Model() {
       registerMatrix("weights", new DoubleArrayWithIntKey(dim + 1))
@@ -252,9 +250,9 @@ object LogisticRegression {
     dm
   }
 
-  def trainASGD(sc : SparkContext, samples: RDD[(mutable.HashMap[Int, Double], Int)], psCount : Int,
-                psBackup : Boolean, dim : Long,
-                eta : Double, maxIterations : Int, batchSize : Int): DistML[Iterator[(Int, String, DataStore)]] = {
+  def trainASGD(sc: SparkContext, samples: RDD[(mutable.HashMap[Int, Double], Int)], psCount: Int,
+    psBackup: Boolean, dim: Long,
+    eta: Double, maxIterations: Int, batchSize: Int): DistML[Iterator[(Int, String, DataStore)]] = {
 
     val m = new Model() {
       registerMatrix("weights", new DoubleArrayWithIntKey(dim + 1))
@@ -268,8 +266,8 @@ object LogisticRegression {
     dm
   }
 
-  def trainSSP(sc : SparkContext, samples: RDD[(mutable.HashMap[Int, Double], Int)], psCount : Int, dim : Long,
-            eta : Double, maxIterations : Int, maxLag : Int): DistML[Iterator[(Int, String, DataStore)]] = {
+  def trainSSP(sc: SparkContext, samples: RDD[(mutable.HashMap[Int, Double], Int)], psCount: Int, dim: Long,
+    eta: Double, maxIterations: Int, maxLag: Int): DistML[Iterator[(Int, String, DataStore)]] = {
 
     val m = new Model() {
       registerMatrix("weights", new DoubleArrayWithIntKey(dim + 1))
@@ -284,8 +282,8 @@ object LogisticRegression {
     dm
   }
 
-  def collect(dm : DistML[Iterator[(Int, String, DataStore)]]): Array[(Int, Double)] = {
-    val allWeights = dm.params().flatMap( it => {
+  def collect(dm: DistML[Iterator[(Int, String, DataStore)]]): Array[(Int, Double)] = {
+    val allWeights = dm.params().flatMap(it => {
       val m = it.next
       val store = m._3.asInstanceOf[DoubleArrayStore]
       val weights = store.iter()
@@ -302,7 +300,7 @@ object LogisticRegression {
     allWeights
   }
 
-  def predict(data : RDD[mutable.HashMap[Int, Double]], dm : DistML[Iterator[(Int, String, DataStore)]]): RDD[Double] = {
+  def predict(data: RDD[mutable.HashMap[Int, Double]], dm: DistML[Iterator[(Int, String, DataStore)]]): RDD[Double] = {
 
     val m = dm.model
     val result = data.mapPartitionsWithIndex((index, it) => {
@@ -341,7 +339,7 @@ object LogisticRegression {
     result
   }
 
-  def auc(data : RDD[(mutable.HashMap[Int, Double], Int)], dm : DistML[Iterator[(Int, String, DataStore)]]): Double = {
+  def auc(data: RDD[(mutable.HashMap[Int, Double], Int)], dm: DistML[Iterator[(Int, String, DataStore)]]): Double = {
 
     val m = dm.model
     val monitorPath = dm.monitorPath

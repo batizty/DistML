@@ -17,11 +17,11 @@ import scala.collection.mutable.ListBuffer
  */
 object LDAExample {
 
-  def normalizeString(src : String) : String = {
+  def normalizeString(src: String): String = {
     src.replaceAll("[^A-Z^a-z]", " ").trim().toLowerCase();
   }
 
-  def fromWordsToIds(bdic : Broadcast[Dict])(line : String) : Array[Int] = {
+  def fromWordsToIds(bdic: Broadcast[Dict])(line: String): Array[Int] = {
 
     val dic = bdic.value
 
@@ -68,7 +68,7 @@ object LDAExample {
         .action((x, c) => c.copy(partitions = x))
       opt[Boolean]("showPlexity")
         .text(s"Show plexity after each iteration." +
-        s" default: ${defaultParams.showPlexity}")
+          s" default: ${defaultParams.showPlexity}")
         .action((x, c) => c.copy(showPlexity = x))
       arg[String]("<input>...")
         .text("input paths (directories) to plain text corpora.")
@@ -121,7 +121,6 @@ object LDAExample {
     println("Tokens: " + statistics._2)
     println("Topics: " + p.k)
     println("=============== Corpus Info End   ================")
-
 
     val dm = LightLDA.train(sc, data, dic.getSize, p)
 

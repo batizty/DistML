@@ -8,11 +8,12 @@ import scala.collection.mutable
 /**
  * Created by yunlong on 1/3/16.
  */
-abstract class SparseMatrixAdapGrad[K, V] (
-dim : Long,
-cols: Int,
-keyType : Int,
-valueType : Int) extends DMatrix(dim) {
+abstract class SparseMatrixAdapGrad[K, V](
+  dim: Long,
+  cols: Int,
+  keyType: Int,
+  valueType: Int
+) extends DMatrix(dim) {
 
   format = new DataDesc(DataDesc.DATA_TYPE_MATRIX, keyType, valueType, false, true, true)
   val colKeys = new KeyRange(0, cols - 1)
@@ -24,7 +25,7 @@ valueType : Int) extends DMatrix(dim) {
     val data = session.dataBus.fetch(name, rows, format)
     for (obj <- data) {
       val m: mutable.HashMap[K, (Array[V], Array[Float])] = readMap(obj)
-      m.foreach( f => result += f )
+      m.foreach(f => result += f)
     }
     return result
   }
@@ -48,9 +49,9 @@ valueType : Int) extends DMatrix(dim) {
     for ((k, v) <- data) {
 
       val tv = createValueArray(v._1.length)
-      for (i <- 0 to v._1.length-1)
+      for (i <- 0 to v._1.length - 1)
         tv(i) = v._1(i)
-//      System.arraycopy(tv, 0, v._1, 0, v._1.length)
+      //      System.arraycopy(tv, 0, v._1, 0, v._1.length)
       t.put(k, tv)
     }
     t
@@ -60,7 +61,7 @@ valueType : Int) extends DMatrix(dim) {
     //println("get update: " + oldData.size)
     for ((k, v) <- newData) {
       val tv = oldData.get(k).get
-      for (i <- 0 to v._1.length-1) {
+      for (i <- 0 to v._1.length - 1) {
         tv(i) = subtract(v._1(i), tv(i))
       }
     }
@@ -70,15 +71,15 @@ valueType : Int) extends DMatrix(dim) {
       var v = oldData.get(k).get
 
       var i = 0
-      while((i < v.length) && isZero(v(i))) {
+      while ((i < v.length) && isZero(v(i))) {
         i += 1
       }
       if (i == v.length) {
         oldData.remove(k)
       }
-//      else {
-//        println("update(" + k + ")(0) = " + v(0))
-//      }
+      //      else {
+      //        println("update(" + k + ")(0) = " + v(0))
+      //      }
     }
     //println("get update done: " + oldData.size)
   }
@@ -101,11 +102,10 @@ valueType : Int) extends DMatrix(dim) {
           alphas(i) = format.readFloat(buf, offset)
           offset += 4
         }
-      }
-      else {
+      } else {
         val count: Int = format.readInt(buf, offset)
         offset += 4
-        for (i <- 0 to count -1 ) {
+        for (i <- 0 to count - 1) {
           val index: Int = format.readInt(buf, offset)
           offset += 4
           values(i) = format.readValue(buf, offset).asInstanceOf[V]
@@ -127,8 +127,7 @@ valueType : Int) extends DMatrix(dim) {
     if (format.denseColumn) {
       val len: Int = (format.valueSize * data.size * colKeys.size).toInt
       buf = new Array[Byte](format.keySize * data.size + len)
-    }
-    else {
+    } else {
       var nzcount: Int = 0
       for (values <- data.values) {
         for (value <- values) {
@@ -147,12 +146,11 @@ valueType : Int) extends DMatrix(dim) {
       offset += format.keySize
       val values: Array[V] = v
       if (format.denseColumn) {
-        for ( i <- 0 to colKeys.size.toInt - 1) {
+        for (i <- 0 to colKeys.size.toInt - 1) {
           format.writeValue(values(i), buf, offset)
           offset += format.valueSize
         }
-      }
-      else {
+      } else {
         val counterIndex: Int = offset
         offset += 4
         var counter: Int = 0
@@ -172,11 +170,11 @@ valueType : Int) extends DMatrix(dim) {
     return buf
   }
 
-  protected def toLong(k : K) : Long
+  protected def toLong(k: K): Long
 
   protected def isZero(value: V): Boolean
 
-  protected def subtract(value: V, delta : V): V
+  protected def subtract(value: V, delta: V): V
 
   protected def createValueArrayWithAlpha(size: Int): Array[(V, Float)]
 
