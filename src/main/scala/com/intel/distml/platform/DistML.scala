@@ -8,18 +8,16 @@ import akka.actor._
 import com.intel.distml.api.Model
 import com.intel.distml.platform.MonitorActor._
 import com.intel.distml.util.DataStore
-import com.intel.distml.util.scala.DoubleArrayWithIntKey
+
 import com.typesafe.config.ConfigFactory
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{Path, FileSystem}
-import org.apache.spark.{SparkContext}
-
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.scheduler._
 
-import scala.collection.mutable
-import scala.reflect.ClassTag
 import scala.collection.JavaConversions._
+import scala.reflect.ClassTag
 
 /**
  * Created by yunlong on 12/8/15.
