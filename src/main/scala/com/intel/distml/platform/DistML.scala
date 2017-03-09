@@ -208,6 +208,7 @@ object DistML {
       |akka.io.tcp.direct-buffer-size = 2 MB
       |akka.io.tcp.trace-logging=off
       |akka.remote.netty.tcp.maximum-frame-size=4126935
+      |akka.version= 2.3.4
     """.stripMargin
 
   def dummyF(model: Model, index: Int, stores: java.util.HashMap[String, DataStore]): Int = {
