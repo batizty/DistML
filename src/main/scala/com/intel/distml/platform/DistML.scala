@@ -209,6 +209,7 @@ object DistML {
       |akka.io.tcp.trace-logging=off
       |akka.remote.netty.tcp.maximum-frame-size=4126935
       |akka.version= 2.3.4
+      |akka.actor.guardian-supervisor-strategy="akka.actor.DefaultSupervisorStrategy"
     """.stripMargin
 
   def dummyF(model: Model, index: Int, stores: java.util.HashMap[String, DataStore]): Int = {
