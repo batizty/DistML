@@ -35,5 +35,5 @@
   Liu Lantao (Intern, Graduated)<br>
   Hao Ruixiang (Intern, Graduated)<br>
   
-## Modify
+## Modify(@batizty)
 1. Change code to Support Spark 2.0.2
