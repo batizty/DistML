@@ -20,8 +20,8 @@ import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
 /**
- * Created by yunlong on 12/8/15.
- */
+  * Created by yunlong on 12/8/15.
+  */
 
 object DistMLState extends Enumeration {
   type DistMLState = Value
@@ -33,13 +33,13 @@ object DistMLState extends Enumeration {
 }
 
 class DistML[T: ClassTag](
-  val model: Model,
-  val psCount: Int,
-  system: ActorSystem,
-  val monitorPath: String,
-  monitorActor: ActorRef,
-  psDriverThread: ParamServerDriver[T]
-) extends SparkListener {
+                           val model: Model,
+                           val psCount: Int,
+                           system: ActorSystem,
+                           val monitorPath: String,
+                           monitorActor: ActorRef,
+                           psDriverThread: ParamServerDriver[T]
+                         ) extends SparkListener {
 
   var state = DistMLState.READY
 
@@ -198,18 +198,50 @@ class DistML[T: ClassTag](
 }
 
 object DistML {
-
   var ACTOR_SYSTEM_CONFIG =
     """
-      |akka.actor.provider="akka.remote.RemoteActorRefProvider"
-      |akka.remote.netty.tcp.port=0
-      |akka.remote.log-remote-lifecycle-events=off
-      |akka.log-dead-letters=off
-      |akka.io.tcp.direct-buffer-size = 2 MB
-      |akka.io.tcp.trace-logging=off
-      |akka.remote.netty.tcp.maximum-frame-size=4126935
-      |akka.version= 2.3.4
-      |akka.actor.guardian-supervisor-strategy="akka.actor.DefaultSupervisorStrategy"
+      | akka {
+      |
+      |      # Akka event log handler
+      |      event-handlers = ["akka.event.slf4j.Slf4jEventHandler"]
+      |
+      |      # Akka log level
+      |      loglevel = "DEBUG"
+      |      log-dead-letters = off
+      |
+      |      # Akka remoting configuration
+      |      remote {
+      |
+      |        # Remote lifecycle events logging has been turned off to prevent akka from cluttering the logs with unnecessary
+      |        # info
+      |        log-remote-lifecycle-events = off
+      |
+      |        # Use netty tcp transport
+      |        enable-transports = ["akka.remote.netty.tcp"]
+      |
+      |        # Set netty maximum frame size
+      |        netty.tcp {
+      |          port = 0
+      |          maximum-frame-size = 4126935
+      |        }
+      |      }
+      |
+      |      # Akka actor configuration
+      |      actor {
+      |
+      |        # Enable remoting
+      |        provider = "akka.remote.RemoteActorRefProvider"
+      |
+      |        guardian-supervisor-strategy = "akka.actor.DefaultSupervisorStrategy"
+      |      }
+      |      io {
+      |         tcp {
+      |           direct-buffer-size = 2 MB
+      |           trace-logging = off
+      |         }
+      |     }
+      |     version = 2.3.4
+      |  }
     """.stripMargin
 
   def dummyF(model: Model, index: Int, stores: java.util.HashMap[String, DataStore]): Int = {
@@ -245,13 +277,13 @@ object DistML {
   //    distribute[T](sc, model, psCount, false, f)
   //  }
   def distribute[T: ClassTag](sc: SparkContext, model: Model, psCount: Int,
-    f: Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
+                              f: Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
 
     distribute[T](sc, model, psCount, false, f)
   }
 
   def distribute[T: ClassTag](sc: SparkContext, model: Model, psCount: Int, psBackup: Boolean,
-    f: Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
+                              f: Function3[Model, Int, java.util.HashMap[String, DataStore], T]): DistML[T] = {
 
     model.autoPartition(psCount)
 
