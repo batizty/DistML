@@ -211,6 +211,7 @@ object DistML {
       |      stdout-loglevel = "DEBUG"
       |      loggers = ["akka.event.slf4j.Slf4jLogger"]
       |      logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+      |      logger-startup-timeout = 5s
       |
       |      # Akka remoting configuration
       |      remote {
