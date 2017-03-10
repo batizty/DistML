@@ -301,7 +301,8 @@ object DistML {
     val MONITOR_ACTOR_NAME = "monitor"
 
     // Start actor system
-    val monitorRemoteConfig = ConfigFactory.parseString(ACTOR_SYSTEM_CONFIG)
+    val defaultConfig = ConfigFactory.load()
+    val monitorRemoteConfig = ConfigFactory.parseString(ACTOR_SYSTEM_CONFIG).withFallback(defaultConfig)
     val monitorActorSystem = ActorSystem(MONITOR_ACTOR_SYSTEM_NAME, ConfigFactory.load(monitorRemoteConfig))
 
     val monitorActorRef = monitorActorSystem.actorOf(MonitorActor.props(model), MONITOR_ACTOR_NAME)
