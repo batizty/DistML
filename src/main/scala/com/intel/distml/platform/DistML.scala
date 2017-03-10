@@ -208,6 +208,9 @@ object DistML {
       |      # Akka log level
       |      loglevel = "DEBUG"
       |      log-dead-letters = off
+      |      stdout-loglevel = "DEBUG"
+      |      loggers = ["akka.event.slf4j.Slf4jLogger"]
+      |      logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
       |
       |      # Akka remoting configuration
       |      remote {
@@ -238,6 +241,7 @@ object DistML {
       |
       |        unstarted-push-timeout = 30s
       |        serialize-messages = on
+      |        serialize-creators = on
       |      }
       |      io {
       |         tcp {
